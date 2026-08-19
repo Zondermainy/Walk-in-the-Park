@@ -1,17 +1,20 @@
 package dev.efnilite.ip.hook;
 
+import dev.efnilite.ip.IP;
 import org.bukkit.entity.Player;
-import org.geysermc.floodgate.api.FloodgateApi;
 
 public class FloodgateHook {
 
-    /**
-     * Whether this player is a bedrock player.
-     *
-     * @param player The player.
-     * @return True if this player is a bedrock player, false if not.
-     */
     public static boolean isBedrockPlayer(Player player) {
-        return FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId());
+        try {
+            Object api = Class.forName("org.geysermc.floodgate.api.FloodgateApi")
+                    .getMethod("getInstance")
+                    .invoke(null);
+            return (boolean) Class.forName("org.geysermc.floodgate.api.FloodgateApi")
+                    .getMethod("isFloodgatePlayer", java.util.UUID.class)
+                    .invoke(api, player.getUniqueId());
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }

@@ -89,10 +89,27 @@ public class World {
         deleteWorld();
     }
 
+    private static File getWorldFolder() {
+        File container = Bukkit.getWorldContainer();
+        File file = new File(container, name);
+
+        if (file.exists()) {
+            return file;
+        }
+
+        // fallback: world may be in a subfolder
+        File subfolder = new File(name);
+        if (subfolder.exists()) {
+            return subfolder;
+        }
+
+        return file;
+    }
+
     private static void deleteWorld() {
         IP.log("Deleting Spigot world");
 
-        File file = new File(name);
+        File file = getWorldFolder();
 
         // world has already been deleted
         if (!file.exists()) {

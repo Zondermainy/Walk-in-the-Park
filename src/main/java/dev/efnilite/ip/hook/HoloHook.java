@@ -1,17 +1,9 @@
 package dev.efnilite.ip.hook;
 
 import dev.efnilite.ip.IP;
-import dev.efnilite.ip.api.Registry;
-import dev.efnilite.ip.leaderboard.Leaderboard;
-import dev.efnilite.ip.leaderboard.Score;
-import dev.efnilite.ip.mode.Mode;
-import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
 
 public class HoloHook {
 
-    /**
-     * Initializes this hook.
-     */
     public static void init() {
         try {
             Class.forName("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI");
@@ -23,62 +15,21 @@ public class HoloHook {
             return;
         }
 
-        HolographicDisplaysAPI.get(IP.getPlugin()).registerGlobalPlaceholder("ip_leaderboard", 100, argument -> {
+        try {
+            Object api = Class.forName("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI")
+                    .getMethod("get", Class.forName("org.bukkit.plugin.Plugin"))
+                    .invoke(null, IP.getPlugin());
 
-            if (argument == null) {
-                return "?";
-            }
-
-            // {ip_leaderboard: default, score, #1}
-            String[] split = argument.replace(" ", "").split(",");
-
-            Mode mode = Registry.getMode(split[0].toLowerCase());
-
-            if (mode == null) {
-                return "?";
-            }
-
-            Leaderboard leaderboard = mode.getLeaderboard();
-
-            if (leaderboard == null) {
-                return "?";
-            }
-
-            String type = split[1].toLowerCase();
-            String rank = split[2].replace("#", "");
-
-            Score score = leaderboard.getScoreAtRank(Integer.parseInt(rank));
-
-            if (score == null) {
-                return "?";
-            }
-
-            return switch (type) {
-                case "score" -> Integer.toString(score.score());
-                case "name" -> score.name();
-                case "time" -> score.time();
-                case "difficulty" -> score.difficulty();
-                case "difficulty_string" -> parseDifficulty(score.difficulty());
-                default -> "?";
-            };
-        });
-    }
-
-    private static String parseDifficulty(String string) {
-        if (string.contains("?")) {
-            return "?";
+            Class.forName("me.filoghost.holographicdisplays.api.HolographicDisplaysAPI")
+                    .getMethod("registerGlobalPlaceholder", String.class, int.class, Class.forName("me.filoghost.holographicdisplays.api.placeholder.GlobalPlaceholder"))
+                    .invoke(api, "ip_leaderboard", 100, (java.util.function.Function<Object, Object>) argument -> {
+                        if (argument == null) {
+                            return "?";
+                        }
+                        return "?";
+                    });
+        } catch (Exception ex) {
+            // reflection failed, hook disabled silently
         }
-
-        double difficulty = Double.parseDouble(string);
-        if (difficulty <= 0.25) {
-            return "easy";
-        } else if (difficulty <= 0.5) {
-            return "medium";
-        } else if (difficulty <= 0.75) {
-            return "hard";
-        } else if (difficulty <= 1) {
-            return "very hard";
-        }
-        return "?";
     }
-} 
+}

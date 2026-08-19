@@ -149,7 +149,11 @@ public class Option {
         try {
             PARTICLE_TYPE = Particle.valueOf(value);
         } catch (IllegalArgumentException ex) {
-            PARTICLE_TYPE = Particle.valueOf("SPELL_INSTANT");
+            try {
+                PARTICLE_TYPE = Particle.valueOf("SPELL_INSTANT");
+            } catch (IllegalArgumentException ex2) {
+                PARTICLE_TYPE = Particle.valueOf("END_ROD");
+            }
             IP.logging().error("Invalid particle type: %s".formatted(value));
         }
 
